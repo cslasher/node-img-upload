@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const upload = require('./services/upload');
+const listObjects = require('./services/list');
+require('./config/config');
 
 const port = process.env.PORT;
 
@@ -20,6 +22,18 @@ app.post('/upload', (req, res) => {
 
     return res.json({ imageUrl: req.file.location });
   });
+});
+
+app.get('/uploads', (req, res) => {
+  listObjects(process.env['bucketName'])
+    .then(images => {
+      res.json({ images: images });
+    })
+    .catch(err => {
+      res.status(422).send({
+        errors: [{ title: 'Image Upload Error', detail: err.message }]
+      });
+    });
 });
 
 app.listen(port, () => {

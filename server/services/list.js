@@ -1,8 +1,10 @@
 const aws = require('./aws');
 
-const listObjects = async bucket => {
+require('../config/config');
+
+const listObjects = async () => {
   const params = {
-    Bucket: bucket
+    Bucket: process.env['bucketName']
   };
 
   const s3 = new aws.S3();

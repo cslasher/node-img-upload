@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 
 const upload = require('./services/upload');
 const listObjects = require('./services/list');
-require('./config/config');
+const deleteObject = require('./services/delete');
 
 const port = process.env.PORT;
 
@@ -16,22 +16,37 @@ app.post('/upload', (req, res) => {
   singleUpload(req, res, (err, some) => {
     if (err) {
       return res.status(422).send({
-        errors: [{ title: 'Image Upload Error', detail: err.message }]
+        errors: [{ title: 'Image Uploading Error', detail: err.message }]
       });
     }
 
-    return res.json({ imageUrl: req.file.location });
+    return res.json({
+      status: 'success',
+      message: { imageUrl: req.file.location }
+    });
   });
 });
 
 app.get('/uploads', (req, res) => {
-  listObjects(process.env['bucketName'])
+  listObjects()
     .then(images => {
-      res.json({ images: images });
+      res.json({ status: 'success', message: { images: images } });
     })
     .catch(err => {
       res.status(422).send({
-        errors: [{ title: 'Image Upload Error', detail: err.message }]
+        errors: [{ title: 'Images Listing Error', detail: err.message }]
+      });
+    });
+});
+
+app.delete('/upload', (req, res) => {
+  deleteObject(req.params.imageId)
+    .then(() => {
+      res.json({ status: 'success' });
+    })
+    .catch(err => {
+      res.status(422).send({
+        errors: [{ title: 'Image Deletion Error', detail: err.message }]
       });
     });
 });
